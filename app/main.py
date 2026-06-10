@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
+from app.routes import users
 
 # ساخت جداول دیتابیس اگر وجود نداشته باشند (فقط برای محیط توسعه)
 Base.metadata.create_all(bind=engine)
@@ -40,3 +41,5 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "service": "CareerFlow Core"}
+
+app.include_router(users.router)
