@@ -36,6 +36,10 @@ class JobOpportunityBase(BaseModel):
     market_type: MarketType = Field(..., description="بازار این شغل")
     url: Optional[str] = Field(None, description="لینک آگهی شغلی")
     status: JobStatus = Field(default=JobStatus.open)
+    source: str = Field(default="Unknown", description="منبع آگهی (مثلاً Jobinja, LinkedIn)")
+    is_remote: bool = Field(default=False, description="آیا شغل دورکاری است؟")
+
+
 
 class JobOpportunityCreate(JobOpportunityBase):
     pass
@@ -55,3 +59,5 @@ class JobOpportunityUpdate(BaseModel):
     market_type: Optional[MarketType] = None
     url: Optional[str] = None
     status: Optional[JobStatus] = None
+    source: Optional[str] = None         
+    is_remote: Optional[bool] = None 

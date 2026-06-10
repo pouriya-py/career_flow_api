@@ -1,5 +1,5 @@
 # app/models.py
-from sqlalchemy import Column, Integer, String, JSON, Enum as SQLEnum
+from sqlalchemy import Column, Boolean, Integer, String, JSON, Enum as SQLEnum
 from app.database import Base
 import enum
 
@@ -32,3 +32,5 @@ class JobOpportunity(Base):
     market_type = Column(SQLEnum(MarketType), nullable=False)
     url = Column(String(255), nullable=True)
     status = Column(SQLEnum(JobStatus), default=JobStatus.open, nullable=False)
+    source = Column(String(100), default="Unknown", nullable=True)
+    is_remote = Column(Boolean, default=False, nullable=False)

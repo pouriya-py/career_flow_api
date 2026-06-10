@@ -9,6 +9,7 @@ from app import models, schemas
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 # ۱. دریافت لیست شغل‌ها با قابلیت فیلتر و جستجو
+# در app/routes/jobs.py، پارامترهای تابع get_jobs را آپدیت کن:
 @router.get("/", response_model=List[schemas.JobOpportunityResponse])
 def get_jobs(
     skip: int = 0,
@@ -16,8 +17,29 @@ def get_jobs(
     market_type: Optional[schemas.MarketType] = Query(None, description="فیلتر بر اساس بازار (IRAN یا GLOBAL)"),
     search: Optional[str] = Query(None, description="جستجو در عنوان شغل یا نام شرکت"),
     status_filter: Optional[schemas.JobStatus] = Query(None, alias="status", description="فیلتر بر اساس وضعیت"),
+    source: Optional[str] = Query(None, description="فیلتر بر اساس منبع (مثلاً Jobinja, LinkedIn)"),
+    is_remote: Optional[bool] = Query(None, description="فقط شغل‌های دورکاری"),
     db: Session = Depends(get_db)
 ):
+    query = db.query(models.JobOpportunity)
+    
+    if market_type:
+        query = query.filter(models.JobOpportunity.market_type == market_type)
+    if status_filter:
+        query = query.filter(models.JobOpportunity.status == status_filter)
+    if source:
+        query = query.filter(models.JobOpportunity.source.ilike(f"%{source}%"))
+    if is_remote is not None:
+        query = query.filter(models.JobOpportunity.is_remote == is_remote)
+        
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (models.JobOpportunity.title.ilike(search_term)) | 
+            (models.JobOpportunity.company.ilike(search_term))
+        )
+    
+    return query.offset(skip).limit(limit).all()
     query = db.query(models.JobOpportunity)
     
     # اعمال فیلتر بازار
