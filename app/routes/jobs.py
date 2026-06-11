@@ -130,3 +130,29 @@ def match_jobs_for_user(
     
     matched_jobs.sort(key=lambda x: x["match_percentage"], reverse=True)
     return matched_jobs
+
+
+
+@router.post("/webhook/jobs", status_code=status.HTTP_201_CREATED)
+def receive_external_jobs(jobs: List[schemas.JobOpportunityCreate], db: Session = Depends(get_db)):
+
+    saved_count = 0
+    
+    for job_data in jobs:
+        # بررسی تکراری نبودن شغل (بر اساس عنوان و شرکت)
+        existing_job = db.query(models.JobOpportunity).filter(
+            models.JobOpportunity.title == job_data.title,
+            models.JobOpportunity.company == job_data.company
+        ).first()
+        
+        if not existing_job:
+            new_job = models.JobOpportunity(**job_data.model_dump())
+            db.add(new_job)
+            saved_count += 1
+            
+    db.commit()
+    
+    return {
+        "message": f"تعداد {saved_count} شغل جدید با موفقیت ذخیره شد.",
+        "total_received": len(jobs)
+    }
