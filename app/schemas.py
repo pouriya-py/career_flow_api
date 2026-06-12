@@ -2,6 +2,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from enum import Enum
+from pydantic import EmailStr
 
 # تعریف یک Enum برای بازار هدف (استانداردسازی داده‌ها)
 class MarketType(str, Enum):
@@ -18,12 +19,17 @@ class UserProfileBase(BaseModel):
     skills: List[str] = Field(..., description="لیست مهارت‌ها (مثلاً: ['Python', 'FastAPI'])")
     target_market: MarketType = Field(default=MarketType.global_market, description="بازار هدف: IRAN یا GLOBAL")
     experience_years: int = Field(..., ge=0, le=50, description="سال‌های تجربه")
+    email: Optional[EmailStr] = Field(None, description="ایمیل کاربر برای ارسال اعلان‌ها")
+
 
 class UserProfileCreate(UserProfileBase):
     pass # در آینده می‌توانیم فیلدهای خاصی برای ساخت اضافه کنیم
 
 class UserProfileResponse(UserProfileBase):
     id: int
+    telegram_chat_id: Optional[str] = None
+    telegram_activation_code: Optional[str] = None
+    is_telegram_verified: bool = False
     
     class Config:
         from_attributes = True # معادل orm_mode در Pydantic v2

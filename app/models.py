@@ -21,6 +21,10 @@ class UserProfile(Base):
     skills = Column(JSON, nullable=False) 
     target_market = Column(SQLEnum(MarketType), default=MarketType.global_market, nullable=False)
     experience_years = Column(Integer, nullable=False)
+    email = Column(String(100), nullable=True, unique=True)
+    telegram_chat_id = Column(String(50), nullable=True, unique=True) # بعد از تایید پر می‌شود
+    telegram_activation_code = Column(String(100), nullable=True, unique=True) # کدی که سایت می‌سازد
+    is_telegram_verified = Column(Boolean, default=False, nullable=False) # وضعیت تایید
 
 class JobOpportunity(Base):
     __tablename__ = "job_opportunities"
