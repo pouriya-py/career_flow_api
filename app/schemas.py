@@ -20,6 +20,7 @@ class UserProfileBase(BaseModel):
     target_market: MarketType = Field(default=MarketType.global_market, description="بازار هدف: IRAN یا GLOBAL")
     experience_years: int = Field(..., ge=0, le=50, description="سال‌های تجربه")
     email: Optional[EmailStr] = Field(None, description="ایمیل کاربر برای ارسال اعلان‌ها")
+    favorite_source_ids: Optional[List[int]] = Field(default=[], description="لیست ID سایت‌های کاریابی مورد علاقه")
 
 
 class UserProfileCreate(UserProfileBase):
@@ -30,6 +31,11 @@ class UserProfileResponse(UserProfileBase):
     telegram_chat_id: Optional[str] = None
     telegram_activation_code: Optional[str] = None
     is_telegram_verified: bool = False
+    favorite_sources: Optional[List['JobSourceResponse']] = []
+
+    
+    class Config:
+        from_attributes = True
     
     class Config:
         from_attributes = True # معادل orm_mode در Pydantic v2
@@ -67,3 +73,17 @@ class JobOpportunityUpdate(BaseModel):
     status: Optional[JobStatus] = None
     source: Optional[str] = None         
     is_remote: Optional[bool] = None 
+    
+    
+class JobSourceBase(BaseModel):
+    name: str = Field(..., description="نام انگلیسی سایت (مثلاً Jobinja)")
+    display_name: str = Field(..., description="نام نمایشی (مثلاً جابینجا)")
+    base_url: Optional[str] = Field(None, description="آدرس پایه سایت")
+    is_active: bool = Field(default=True, description="آیا سایت فعال است؟")
+    is_freelance: bool = Field(default=False, description="آیا سایت فریلنسری است؟")
+
+class JobSourceResponse(JobSourceBase):
+    id: int
+    
+    class Config:
+        from_attributes = True

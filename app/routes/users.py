@@ -16,6 +16,25 @@ async def create_user_profile(user: schemas.UserProfileCreate, db: Session = Dep
     """
     ثبت یک پروفایل کاربر جدید با مهارت‌ها و بازار هدف.
     """
+    favorite_source_ids = user.favorite_source_ids or []
+        # حذف این فیلد از model_dump چون مستقیماً در دیتابیس ذخیره نمی‌شود (رابطه many-to-many است)
+    user_data = user.model_dump(exclude={'favorite_source_ids'})
+    
+    new_user = models.UserProfile(
+        **user_data, 
+        telegram_activation_code=activation_code
+    )
+    
+    # اضافه کردن سایت‌های مورد علاقه به کاربر
+    if favorite_source_ids:
+        sources = db.query(models.JobSource).filter(models.JobSource.id.in_(favorite_source_ids)).all()
+        new_user.favorite_sources = sources
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    
     # بررسی تکراری نبودن نام (یک اعتبارسنجی ساده)
     db_user = db.query(models.UserProfile).filter(models.UserProfile.name == user.name).first()
     if db_user:
