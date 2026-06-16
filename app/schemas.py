@@ -1,30 +1,35 @@
-# app/schemas.py
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 from enum import Enum
-from pydantic import EmailStr
 
-# تعریف یک Enum برای بازار هدف (استانداردسازی داده‌ها)
+
 class MarketType(str, Enum):
-    iran = "IRAN"
-    global_market = "GLOBAL"
+    IRAN = "IRAN"
+    GLOBAL = "GLOBAL"
 
-class JobStatus(str, Enum):
-    open = "OPEN"
-    closed = "CLOSED"
 
-# --- مدل‌های مربوط به کاربر ---
 class UserProfileBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=50, description="نام کاربر")
-    skills: List[str] = Field(..., description="لیست مهارت‌ها (مثلاً: ['Python', 'FastAPI'])")
-    target_market: MarketType = Field(default=MarketType.global_market, description="بازار هدف: IRAN یا GLOBAL")
-    experience_years: int = Field(..., ge=0, le=50, description="سال‌های تجربه")
-    email: Optional[EmailStr] = Field(None, description="ایمیل کاربر برای ارسال اعلان‌ها")
-    favorite_source_ids: Optional[List[int]] = Field(default=[], description="لیست ID سایت‌های کاریابی مورد علاقه")
+    name: str = Field(..., min_length=2, max_length=50)
+    skills: Optional[List[str]] = Field(default=[])
+    target_market: MarketType = Field(default=MarketType.GLOBAL)
+    experience_years: int = Field(..., ge=0, le=50)
+    email: Optional[EmailStr] = None
+    favorite_source_ids: Optional[List[int]] = Field(default=[])
 
 
 class UserProfileCreate(UserProfileBase):
-    pass # در آینده می‌توانیم فیلدهای خاصی برای ساخت اضافه کنیم
+    password: str = Field(..., min_length=6)
+
+
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=50)
+    email: Optional[EmailStr] = None
+    skills: Optional[List[str]] = None
+    target_market: Optional[MarketType] = None
+    experience_years: Optional[int] = Field(None, ge=0, le=50)
+    password: Optional[str] = Field(None, min_length=6)
+    favorite_source_ids: Optional[List[int]] = None
+
 
 class UserProfileResponse(UserProfileBase):
     id: int
@@ -32,58 +37,54 @@ class UserProfileResponse(UserProfileBase):
     telegram_activation_code: Optional[str] = None
     is_telegram_verified: bool = False
     favorite_sources: Optional[List['JobSourceResponse']] = []
-
     
     class Config:
         from_attributes = True
-    
-    class Config:
-        from_attributes = True # معادل orm_mode در Pydantic v2
-
-# --- مدل‌های مربوط به شغل ---
-class JobOpportunityBase(BaseModel):
-    title: str = Field(..., min_length=3, description="عنوان شغلی")
-    company: str = Field(..., description="نام شرکت")
-    required_skills: List[str] = Field(..., description="مهارت‌های مورد نیاز")
-    market_type: MarketType = Field(..., description="بازار این شغل")
-    url: Optional[str] = Field(None, description="لینک آگهی شغلی")
-    status: JobStatus = Field(default=JobStatus.open)
-    source: str = Field(default="Unknown", description="منبع آگهی (مثلاً Jobinja, LinkedIn)")
-    is_remote: bool = Field(default=False, description="آیا شغل دورکاری است؟")
 
 
-
-class JobOpportunityCreate(JobOpportunityBase):
-    pass
-
-class JobOpportunityResponse(JobOpportunityBase):
-    id: int
-    
-    class Config:
-        from_attributes = True
-        
-        
-        
-class JobOpportunityUpdate(BaseModel):
-    title: Optional[str] = None
-    company: Optional[str] = None
-    required_skills: Optional[List[str]] = None
-    market_type: Optional[MarketType] = None
-    url: Optional[str] = None
-    status: Optional[JobStatus] = None
-    source: Optional[str] = None         
-    is_remote: Optional[bool] = None 
-    
-    
 class JobSourceBase(BaseModel):
-    name: str = Field(..., description="نام انگلیسی سایت (مثلاً Jobinja)")
-    display_name: str = Field(..., description="نام نمایشی (مثلاً جابینجا)")
-    base_url: Optional[str] = Field(None, description="آدرس پایه سایت")
-    is_active: bool = Field(default=True, description="آیا سایت فعال است؟")
-    is_freelance: bool = Field(default=False, description="آیا سایت فریلنسری است؟")
+    name: str
+    display_name: str
+    base_url: Optional[str] = None
+    is_active: bool = True
+    is_freelance: bool = False
+
 
 class JobSourceResponse(JobSourceBase):
     id: int
     
     class Config:
         from_attributes = True
+
+
+class JobOpportunityBase(BaseModel):
+    title: str = Field(..., min_length=3)
+    company: str
+    required_skills: List[str]
+    market_type: MarketType
+    url: Optional[str] = None
+    source: Optional[str] = None
+    is_remote: bool = False
+
+
+class JobOpportunityCreate(JobOpportunityBase):
+    pass
+
+
+class JobOpportunityResponse(JobOpportunityBase):
+    id: int
+    status: str = "ACTIVE"
+    
+    class Config:
+        from_attributes = True
+
+
+class JobOpportunityUpdate(BaseModel):
+    title: Optional[str] = None
+    company: Optional[str] = None
+    required_skills: Optional[List[str]] = None
+    market_type: Optional[MarketType] = None
+    url: Optional[str] = None
+    status: Optional[str] = None
+    source: Optional[str] = None
+    is_remote: Optional[bool] = None

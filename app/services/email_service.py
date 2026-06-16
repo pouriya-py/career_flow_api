@@ -1,52 +1,47 @@
 # app/services/email_service.py
+import aiosmtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import os
-from datetime import datetime
 
-# پوشه‌ای برای ذخیره ایمیل‌های تستی
-EMAIL_LOG_DIR = "email_logs"
-os.makedirs(EMAIL_LOG_DIR, exist_ok=True)
+SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 1025))
+FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@careerflow.local")
+
 
 async def send_welcome_email(user_email: str, user_name: str, activation_code: str):
-    """شبیه‌سازی ارسال ایمیل (برای تست)"""
-    
-    subject = "🎉 به CareerFlow خوش آمدید!"
-    
-    body = f"""
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "Welcome to CareerFlow! 🚀"
+    msg['From'] = FROM_EMAIL
+    msg['To'] = user_email
+
+    html_content = f"""
     <html>
-    <body style="font-family: Arial, sans-serif; direction: rtl;">
-        <h2 style="color: #4CAF50;">سلام {user_name} عزیز!</h2>
-        
-        <p>ثبت‌نام شما در سیستم CareerFlow با موفقیت انجام شد.</p>
-        
-        <h3>📱 فعال‌سازی تلگرام:</h3>
-        <p>برای دریافت اعلان‌های شغلی در تلگرام، لطفاً به ربات ما مراجعه کنید و دستور زیر را بفرستید:</p>
-        <code style="background: #f4f4f4; padding: 10px; display: block; margin: 10px 0;">
-        /start {activation_code}
-        </code>
-        
-        <h3>🚀 قدم بعدی:</h3>
-        <p>سیستم ما به صورت خودکار شغل‌های مناسب شما را پیدا می‌کند و از طریق تلگرام و ایمیل به شما اطلاع می‌دهد.</p>
-        
-        <hr style="margin: 20px 0;">
-        <p style="color: #888; font-size: 12px;">
-        این یک ایمیل خودکار از سیستم CareerFlow است.
-        </p>
+    <body style="font-family: Arial, sans-serif; direction: ltr; text-align: left; background-color: #f9fafb; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+            <h2 style="color: #7c3aed; margin-top: 0;">Hello {user_name}! 👋</h2>
+            <p>Welcome to <strong>CareerFlow</strong> - your AI-powered job matching platform.</p>
+            <p>To connect your account to our Telegram bot and receive personalized job recommendations, send this code to the bot:</p>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px dashed #7c3aed;">
+                <code style="font-size: 24px; font-weight: bold; color: #7c3aed; letter-spacing: 2px;">{activation_code}</code>
+            </div>
+            <p style="color: #6b7280; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 12px;">CareerFlow AI - Smart Job Matching System</p>
+        </div>
     </body>
     </html>
     """
-    
-    # ذخیره در فایل HTML برای مشاهده
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{EMAIL_LOG_DIR}/email_{timestamp}.html"
-    
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(body)
-    
-    print(f"📧 ایمیل شبیه‌سازی شده برای {user_email}")
-    print(f"📁 فایل ذخیره شده: {filename}")
-    
-    return {
-        "success": True,
-        "message": "ایمیل (شبیه‌سازی) با موفقیت ذخیره شد",
-        "preview_file": filename
-    }
+    msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            use_tls=False
+        )
+        print(f"📧 Welcome email sent to {user_email}")
+    except Exception as e:
+        print(f"⚠️ Error sending email: {e}")
+        print("💡 Make sure Mailpit is running: mailpit")

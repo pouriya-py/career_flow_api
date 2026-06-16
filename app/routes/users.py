@@ -14,12 +14,12 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post("/", response_model=schemas.UserProfileResponse, status_code=status.HTTP_201_CREATED)
 async def create_user_profile(user: schemas.UserProfileCreate, db: Session = Depends(get_db)):
-    """ثبت یک پروفایل کاربر جدید"""
+    """Create a new user profile"""
     db_user = db.query(models.UserProfile).filter(models.UserProfile.name == user.name).first()
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="کاربری با این نام از قبل ثبت شده است."
+            detail="Username already exists."
         )
     
     activation_code = f"ACT-{secrets.token_hex(4).upper()}"
@@ -48,10 +48,10 @@ async def create_user_profile(user: schemas.UserProfileCreate, db: Session = Dep
 
 @router.post("/login")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """ورود و دریافت توکن JWT"""
+    """Login and get JWT token"""
     user = db.query(models.UserProfile).filter(models.UserProfile.name == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="نام کاربری یا رمز عبور اشتباه است")
+        raise HTTPException(status_code=401, detail="Invalid username or password")
     
     access_token = create_access_token(data={"sub": user.name})
     return {"access_token": access_token, "token_type": "bearer"}
@@ -59,14 +59,14 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 
 @router.get("/", response_model=List[schemas.UserProfileResponse])
 def get_all_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    """دریافت لیست کاربران"""
+    """Get list of users"""
     users = db.query(models.UserProfile).offset(skip).limit(limit).all()
     return users
 
 
 @router.get("/me", response_model=schemas.UserProfileResponse)
 def get_current_user_profile(current_user: models.UserProfile = Depends(get_current_user)):
-    """دریافت پروفایل کاربر لاگین شده"""
+    """Get logged-in user profile"""
     return current_user
 
 
@@ -76,7 +76,7 @@ def update_user_profile(
     current_user: models.UserProfile = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """آپدیت پروفایل کاربر"""
+    """Update user profile"""
     update_data = user_update.model_dump(exclude_unset=True)
     
     if 'password' in update_data:

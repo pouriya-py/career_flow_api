@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerFlow | هوش مصنوعی کاریابی</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'Inter', 'sans-serif'], mono: ['Inter', 'monospace'] },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95'
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-glow': 'pulseGlow 3s infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        pulseGlow: { '0%, 100%': { boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)' }, '50%': { boxShadow: '0 0 25px rgba(139, 92, 246, 0.6)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a0a0f;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(17, 17, 27, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .glass-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-hover:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        .input-dark {
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .input-dark:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+        .input-dark::placeholder { color: #6b7280; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(17, 17, 27, 0.5); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #6d28d9; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+        .dropdown-menu {
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: all 0.2s ease;
+        }
+        .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col">
+
+    <header class="glass sticky top-0 z-50 border-b border-purple-500/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-xl animate-pulse-glow group-hover:scale-105 transition-transform">C</div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">CareerFlow</h1>
+                    <p class="text-[10px] text-gray-500 tracking-wider">AI JOB MATCHER</p>
+                </div>
+            </a>
+            <nav class="flex items-center gap-2">
+                <a href="#/" onclick="navigate('dashboard')" id="nav-dashboard" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-500/10 transition text-gray-300 hover:text-white">داشبورد</a>
+                <a href="#/jobs" onclick="navigate('jobs')" id="nav-jobs" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-500/10 transition text-gray-300 hover:text-white">شغل‌ها</a>
+                <a href="#/matches" onclick="navigate('matches')" id="nav-matches" class="nav-link hidden px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-500/10 transition text-brand-300 hover:text-brand-200">✨ پیشنهادات</a>
+                <div id="auth-section">
+                    <a href="#/auth" onclick="navigate('auth')" class="px-5 py-2 rounded-lg text-sm font-bold btn-primary text-white">ورود / ثبت‌نام</a>
+                </div>
+                <div id="user-section" class="relative hidden">
+                    <button onclick="toggleUserMenu()" class="flex items-center gap-2 px-3 py-2 rounded-lg glass glass-hover">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-sm" id="user-avatar">U</div>
+                        <span class="text-sm font-medium text-white hidden sm:block" id="user-name">کاربر</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="user-menu" class="dropdown-menu absolute left-0 top-full mt-2 w-48 glass rounded-xl overflow-hidden shadow-2xl border border-purple-500/20">
+                        <a href="#/panel" onclick="navigate('profile'); toggleUserMenu()" class="block px-4 py-3 text-sm text-gray-300 hover:bg-purple-500/10 transition flex items-center gap-2">
+                            <span>👤</span> پنل کاربری
+                        </a>
+                        <div class="border-t border-purple-500/10"></div>
+                        <button onclick="logout()" class="w-full text-right px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition flex items-center gap-2">
+                            <span>🚪</span> خروج
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-6 py-8 w-full">
+
+        <section id="view-dashboard" class="view-section animate-fade-in-up">
+            <div class="text-center mb-10">
+                <span class="inline-block px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-brand-300 text-xs font-bold mb-4">✨ POWERED BY AI</span>
+                <h2 class="text-4xl md:text-5xl font-black mb-4 text-white">شغل رویایی‌ات را <span class="gradient-text">هوشمند</span> پیدا کن</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">با الگوریتم تطبیق پیشرفته، شغل‌هایی را ببین که دقیقاً با مهارت‌ها و علایق تو همخوانی دارند.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="glass rounded-2xl p-5 glass-hover">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">کل شغل‌ها</span>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg">💼</div>
+                    </div>
+                    <div id="stat-total" class="text-3xl font-bold text-white font-mono">0</div>
+                </div>
+                <div class="glass rounded-2xl p-5 glass-hover">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">دورکاری</span>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-lg">🌍</div>
+                    </div>
+                    <div id="stat-remote" class="text-3xl font-bold text-white font-mono">0</div>
+                </div>
+                <div class="glass rounded-2xl p-5 glass-hover">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">منابع</span>
+                        <div class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-lg">🔗</div>
+                    </div>
+                    <div id="stat-sources" class="text-3xl font-bold text-white font-mono">0</div>
+                </div>
+                <div class="glass rounded-2xl p-5 glass-hover">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">تطابق شما</span>
+                        <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-lg">🎯</div>
+                    </div>
+                    <div id="stat-match" class="text-3xl font-bold text-white font-mono">-</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">📊 توزیع شغل‌ها بر اساس منبع</h3>
+                    <div class="relative h-64"><canvas id="chartSources"></canvas></div>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">🔥 مهارت‌های پرتقاضا</h3>
+                    <div class="relative h-64"><canvas id="chartSkills"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-jobs" class="view-section hidden animate-fade-in-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">💼 همه فرصت‌های شغلی</h2>
+                <button onclick="loadJobs()" class="px-4 py-2 rounded-lg glass glass-hover text-sm font-medium">🔄 بروزرسانی</button>
+            </div>
+            <div id="jobsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="view-matches" class="view-section hidden animate-fade-in-up">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">✨ پیشنهادات هوشمند برای شما</h2>
+                    <p class="text-gray-400 text-sm mt-1">بر اساس مهارت‌ها، بازار هدف و سایت‌های مورد علاقه شما مرتب شده‌اند.</p>
+                </div>
+                <button onclick="loadMatches()" class="px-4 py-2 rounded-lg glass glass-hover text-sm font-medium">🔄 بروزرسانی</button>
+            </div>
+            <div id="matchesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="view-auth" class="view-section hidden animate-fade-in-up max-w-md mx-auto">
+            <div class="glass rounded-2xl p-8 border border-purple-500/20">
+                <div class="flex mb-6 border-b border-purple-500/20">
+                    <button onclick="showAuthTab('login')" id="tab-login" class="flex-1 pb-3 font-bold text-white border-b-2 border-brand-500 transition">ورود</button>
+                    <button onclick="showAuthTab('register')" id="tab-register" class="flex-1 pb-3 font-bold text-gray-500 hover:text-gray-300 transition">ثبت‌نام</button>
+                </div>
+                <form id="loginForm" class="space-y-4">
+                    <input type="text" id="login_username" placeholder="نام کاربری" required class="w-full p-3 rounded-xl input-dark">
+                    <input type="password" id="login_password" placeholder="رمز عبور" required class="w-full p-3 rounded-xl input-dark">
+                    <button type="submit" class="w-full btn-primary text-white py-3 rounded-xl font-bold">ورود به حساب</button>
+                    <div id="login_msg" class="text-sm text-center min-h-[20px]"></div>
+                </form>
+                <form id="registerForm" class="space-y-4 hidden">
+                    <input type="text" id="name" placeholder="نام کاربری" required class="w-full p-3 rounded-xl input-dark">
+                    <input type="password" id="password" placeholder="رمز عبور (حداقل ۶ کاراکتر)" required class="w-full p-3 rounded-xl input-dark">
+                    <input type="email" id="email" placeholder="ایمیل" required class="w-full p-3 rounded-xl input-dark">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="experience_years" placeholder="سال تجربه" required min="0" class="w-full p-3 rounded-xl input-dark">
+                        <select id="target_market" class="w-full p-3 rounded-xl input-dark">
+                            <option value="GLOBAL">🌍 جهانی</option>
+                            <option value="IRAN">🇮🇷 ایران</option>
+                        </select>
+                    </div>
+                    <input type="text" id="skills" placeholder="مهارت‌ها (Python, FastAPI, Docker)" required class="w-full p-3 rounded-xl input-dark">
+                    <div class="glass rounded-xl p-4 border border-purple-500/10">
+                        <label class="block text-sm text-gray-400 mb-3 font-medium">سایت‌های مورد علاقه:</label>
+                        <div id="sourcesList" class="space-y-2 max-h-40 overflow-y-auto custom-scroll pr-2"></div>
+                    </div>
+                    <button type="submit" class="w-full btn-primary text-white py-3 rounded-xl font-bold">ساخت حساب کاربری</button>
+                    <div id="reg_msg" class="text-sm text-center min-h-[20px]"></div>
+                </form>
+            </div>
+        </section>
+
+        <section id="view-profile" class="view-section hidden animate-fade-in-up max-w-2xl mx-auto">
+            <div class="glass rounded-2xl p-8 border border-purple-500/20">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">👤 پنل کاربری</h2>
+                <form id="profileForm" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">نام کاربری</label>
+                            <input type="text" id="profile_name" required class="w-full p-3 rounded-xl input-dark">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">ایمیل</label>
+                            <input type="email" id="profile_email" required class="w-full p-3 rounded-xl input-dark">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">سال تجربه</label>
+                            <input type="number" id="profile_experience" required min="0" class="w-full p-3 rounded-xl input-dark">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">بازار هدف</label>
+                            <select id="profile_market" class="w-full p-3 rounded-xl input-dark">
+                                <option value="GLOBAL">🌍 جهانی</option>
+                                <option value="IRAN">🇮🇷 ایران</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">مهارت‌ها (با کاما جدا کنید)</label>
+                        <input type="text" id="profile_skills" required class="w-full p-3 rounded-xl input-dark">
+                    </div>
+                    <div class="glass rounded-xl p-4 border border-purple-500/10 bg-purple-500/5">
+                        <label class="block text-sm text-brand-300 mb-2 font-bold">کد فعال‌سازی تلگرام</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="profile_activation_code" readonly class="w-full p-3 rounded-xl input-dark font-mono text-brand-300 tracking-widest text-lg cursor-not-allowed opacity-90 bg-black/40">
+                            <button type="button" onclick="copyActivationCode()" class="px-4 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold transition whitespace-nowrap">کپی</button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">این کد را در ربات تلگرام ارسال کنید تا حساب شما متصل شود.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">تغییر رمز عبور (اختیاری)</label>
+                        <input type="password" id="profile_password" placeholder="خالی بگذارید اگر نمی‌خواهید تغییر دهید" class="w-full p-3 rounded-xl input-dark">
+                    </div>
+                    <div class="glass rounded-xl p-4 border border-purple-500/10">
+                        <label class="block text-sm text-gray-400 mb-3 font-medium">سایت‌های مورد علاقه:</label>
+                        <div id="profile_sourcesList" class="space-y-2 max-h-40 overflow-y-auto custom-scroll pr-2"></div>
+                    </div>
+                    <button type="submit" class="w-full btn-primary text-white py-3 rounded-xl font-bold mt-4">ذخیره تغییرات</button>
+                    <div id="profile_msg" class="text-sm text-center min-h-[20px]"></div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 text-gray-600 text-sm border-t border-purple-500/10 mt-auto">
+        ساخته شده با ❤️ توسط پوریا | CareerFlow 2026
+    </footer>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let chartSources = null;
+        let chartSkills = null;
+        let isDashboardLoaded = false;
+
+        function navigate(view) {
+            const hash = view === 'dashboard' ? '' : `/${view}`;
+            window.history.replaceState(null, null, `#${hash}`);
+            handleRoute();
+        }
+
+        function handleRoute() {
+            let hash = window.location.hash.replace('#/', '') || 'dashboard';
+            
+            // تبدیل panel به profile
+            if (hash === 'panel') hash = 'profile';
+            
+            const validViews = ['dashboard', 'jobs', 'matches', 'auth', 'profile'];
+            const view = validViews.includes(hash) ? hash : 'dashboard';
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('text-white', 'bg-purple-500/10');
+                el.classList.add('text-gray-300');
+            });
+
+            const viewEl = document.getElementById(`view-${view}`);
+            if (viewEl) viewEl.classList.remove('hidden');
+            
+            const navId = (view === 'profile') ? 'matches' : view;
+            const navEl = document.getElementById(`nav-${navId}`);
+            if (navEl && view !== 'auth' && view !== 'profile') {
+                navEl.classList.add('text-white', 'bg-purple-500/10');
+                navEl.classList.remove('text-gray-300');
+            }
+
+            if (view === 'dashboard' && !isDashboardLoaded) {
+                loadDashboard();
+                isDashboardLoaded = true;
+            } else if (view === 'jobs') {
+                loadJobs();
+            } else if (view === 'matches') {
+                loadMatches();
+            } else if (view === 'profile') {
+                loadProfile();
+            } else if (view === 'auth') {
+                loadSources();
+            }
+
+            const userMenu = document.getElementById('user-menu');
+            if (userMenu) userMenu.classList.remove('active');
+        }
+
+        window.addEventListener('hashchange', handleRoute);
+
+        function showAuthTab(tab) {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('tab-login').classList.remove('text-white', 'border-b-2', 'border-brand-500');
+            document.getElementById('tab-login').classList.add('text-gray-500');
+            document.getElementById('tab-register').classList.remove('text-white', 'border-b-2', 'border-brand-500');
+            document.getElementById('tab-register').classList.add('text-gray-500');
+            document.getElementById(`${tab}Form`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('text-white', 'border-b-2', 'border-brand-500');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('user-menu').classList.toggle('active');
+        }
+
+        function updateUIAfterLogin(username) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('user-section').classList.remove('hidden');
+            document.getElementById('nav-matches').classList.remove('hidden');
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+        }
+
+        function logout() {
+            token = null;
+            localStorage.removeItem('token');
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('user-section').classList.add('hidden');
+            document.getElementById('nav-matches').classList.add('hidden');
+            navigate('dashboard');
+        }
+
+        function copyActivationCode() {
+            const code = document.getElementById('profile_activation_code').value;
+            navigator.clipboard.writeText(code);
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'کپی شد!';
+            btn.classList.add('bg-green-600');
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('bg-green-600');
+            }, 2000);
+        }
+
+        async function loadDashboard() {
+            try {
+                const jobsRes = await fetch('/jobs/?limit=100');
+                if (!jobsRes.ok) throw new Error(`خطای شبکه: ${jobsRes.status}`);
+                const jobs = await jobsRes.json();
+                const sourcesRes = await fetch('/sources/');
+                const sources = await sourcesRes.json();
+
+                document.getElementById('stat-total').textContent = jobs.length || 0;
+                document.getElementById('stat-remote').textContent = jobs.filter(j => j.is_remote).length || 0;
+                document.getElementById('stat-sources').textContent = sources.length || 0;
+
+                const sourceCounts = {};
+                jobs.forEach(j => { if (j.source) sourceCounts[j.source] = (sourceCounts[j.source] || 0) + 1; });
+                if (chartSources) chartSources.destroy();
+                const ctx1 = document.getElementById('chartSources');
+                if (ctx1) {
+                    chartSources = new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(sourceCounts),
+                            datasets: [{ data: Object.values(sourceCounts), backgroundColor: ['#8b5cf6', '#6366f1', '#a78bfa', '#c4b5fd', '#7c3aed', '#5b21b6'], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e5e7eb', font: { family: 'Vazirmatn' } } } } }
+                    });
+                }
+
+                const skillCounts = {};
+                jobs.forEach(j => { (j.required_skills || []).forEach(s => { skillCounts[s] = (skillCounts[s] || 0) + 1; }); });
+                const topSkills = Object.entries(skillCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+                if (chartSkills) chartSkills.destroy();
+                const ctx2 = document.getElementById('chartSkills');
+                if (ctx2) {
+                    chartSkills = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: topSkills.map(s => s[0]),
+                            datasets: [{ label: 'تعداد', data: topSkills.map(s => s[1]), backgroundColor: 'rgba(139, 92, 246, 0.6)', borderColor: '#8b5cf6', borderWidth: 1, borderRadius: 6 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#9ca3af', font: { family: 'Vazirmatn' } }, grid: { display: false } }, x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(139, 92, 246, 0.1)' } } } }
+                    });
+                }
+            } catch (err) { console.error('Dashboard error:', err); }
+        }
+
+        async function loadJobs() {
+            const container = document.getElementById('jobsList');
+            container.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-500">در حال بارگذاری...</div>';
+            try {
+                const res = await fetch('/jobs/?limit=100');
+                const jobs = await res.json();
+                if (jobs.length === 0) {
+                    container.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-500 glass rounded-2xl">هنوز شغلی ثبت نشده.</div>';
+                    return;
+                }
+                container.innerHTML = jobs.map(job => `
+                    <div class="glass rounded-2xl p-6 glass-hover">
+                        <h3 class="font-bold text-lg text-white mb-2">${job.title}</h3>
+                        <p class="text-gray-400 text-sm mb-3">🏢 ${job.company} <span class="text-brand-400">• ${job.source}</span></p>
+                        <div class="flex flex-wrap gap-1 mb-4">
+                            ${(job.required_skills || []).map(s => `<span class="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-md">${s}</span>`).join('')}
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs ${job.is_remote ? 'text-green-400' : 'text-yellow-400'}">${job.is_remote ? '🌍 دورکاری' : '🏢 حضوری'}</span>
+                            <a href="${job.url}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 font-medium">مشاهده آگهی ←</a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { container.innerHTML = '<div class="col-span-2 text-center py-12 text-red-400">خطا در دریافت شغل‌ها</div>'; }
+        }
+
+        async function loadMatches() {
+            if (!token) { navigate('auth'); return; }
+            const container = document.getElementById('matchesList');
+            container.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-500">در حال تحلیل پروفایل...</div>';
+            try {
+                const res = await fetch('/jobs/matches', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { logout(); return; }
+                const data = await res.json();
+                container.innerHTML = '';
+                if (data.total_matches === 0) {
+                    container.innerHTML = `<div class="col-span-2 text-center py-12 glass rounded-2xl"><p class="text-gray-400 text-lg mb-2">😔 هنوز شغل مناسبی پیدا نشد</p><p class="text-gray-500 text-sm">لطفاً مهارت‌های خود را در <a href="#/panel" onclick="navigate('profile')" class="text-brand-400 hover:underline">پنل کاربری</a> به‌روزرسانی کنید.</p></div>`;
+                    return;
+                }
+                document.getElementById('stat-match').textContent = data.jobs[0]?.match_score + '%' || '-';
+                data.jobs.forEach(job => {
+                    let scoreColor = 'bg-red-500/20 text-red-300 border-red-500/30';
+                    let borderColor = 'border-l-red-500';
+                    if (job.match_score >= 70) { scoreColor = 'bg-green-500/20 text-green-300 border-green-500/30'; borderColor = 'border-l-green-500'; }
+                    else if (job.match_score >= 40) { scoreColor = 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'; borderColor = 'border-l-yellow-500'; }
+                    container.innerHTML += `
+                        <div class="glass rounded-2xl p-6 glass-hover relative overflow-hidden border-l-4 ${borderColor}">
+                            <div class="absolute top-4 left-4 ${scoreColor} border px-3 py-1 rounded-full text-xs font-bold font-mono">${job.match_score}% تطابق</div>
+                            <h3 class="font-bold text-lg text-white mb-2 pr-24">${job.title}</h3>
+                            <p class="text-gray-400 text-sm mb-3">🏢 ${job.company} <span class="text-brand-400">• ${job.source}</span></p>
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${(job.required_skills || []).map(s => `<span class="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-md">${s}</span>`).join('')}
+                            </div>
+                            <div class="flex justify-between items-center mt-4 pt-4 border-t border-purple-500/10">
+                                <span class="text-xs ${job.is_remote ? 'text-green-400' : 'text-yellow-400'}">${job.is_remote ? '🌍 دورکاری' : '🏢 حضوری'}</span>
+                                <a href="${job.url}" target="_blank" class="btn-primary text-white text-sm px-4 py-2 rounded-lg font-bold">مشاهده آگهی ←</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) { container.innerHTML = '<div class="col-span-2 text-center py-12 text-red-400">خطا در دریافت پیشنهادات</div>'; }
+        }
+
+        async function loadSources() {
+            try {
+                const res = await fetch('/sources/active');
+                const sources = await res.json();
+                document.getElementById('sourcesList').innerHTML = sources.map(s => `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-purple-500/10 p-2 rounded transition">
+                        <input type="checkbox" value="${s.id}" class="h-4 w-4 accent-brand-500 rounded">
+                        <span class="text-sm text-gray-300">${s.display_name}</span>
+                    </label>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadProfile() {
+            if (!token) { navigate('auth'); return; }
+            try {
+                const res = await fetch('/users/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { logout(); return; }
+                const user = await res.json();
+                document.getElementById('profile_name').value = user.name;
+                document.getElementById('profile_email').value = user.email || '';
+                document.getElementById('profile_experience').value = user.experience_years;
+                document.getElementById('profile_market').value = user.target_market;
+                document.getElementById('profile_skills').value = (user.skills || []).join(', ');
+                document.getElementById('profile_activation_code').value = user.telegram_activation_code || 'هنوز تولید نشده';
+                const sourcesRes = await fetch('/sources/active');
+                const sources = await sourcesRes.json();
+                const userSourceIds = (user.favorite_sources || []).map(s => s.id);
+                document.getElementById('profile_sourcesList').innerHTML = sources.map(s => `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-purple-500/10 p-2 rounded transition">
+                        <input type="checkbox" value="${s.id}" ${userSourceIds.includes(s.id) ? 'checked' : ''} class="h-4 w-4 accent-brand-500 rounded">
+                        <span class="text-sm text-gray-300">${s.display_name}</span>
+                    </label>
+                `).join('');
+            } catch (err) { console.error('Load profile error:', err); }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('username', document.getElementById('login_username').value);
+            formData.append('password', document.getElementById('login_password').value);
+            const res = await fetch('/users/login', { method: 'POST', body: formData });
+            const msg = document.getElementById('login_msg');
+            if (res.ok) {
+                const data = await res.json();
+                token = data.access_token;
+                localStorage.setItem('token', token);
+                msg.className = 'text-sm text-center text-green-400 block';
+                msg.textContent = '✅ ورود موفق!';
+                const profileRes = await fetch('/users/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (profileRes.ok) {
+                    const user = await profileRes.json();
+                    updateUIAfterLogin(user.name);
+                }
+                setTimeout(() => navigate('matches'), 800);
+            } else {
+                msg.className = 'text-sm text-center text-red-400 block';
+                msg.textContent = '❌ نام کاربری یا رمز اشتباه است';
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('reg_msg');
+            msg.className = 'text-sm text-center text-gray-400 block';
+            msg.textContent = 'در حال ثبت‌نام...';
+            const favSources = Array.from(document.querySelectorAll('#sourcesList input:checked')).map(cb => parseInt(cb.value));
+            const payload = {
+                name: document.getElementById('name').value,
+                password: document.getElementById('password').value,
+                email: document.getElementById('email').value,
+                experience_years: parseInt(document.getElementById('experience_years').value),
+                target_market: document.getElementById('target_market').value,
+                skills: document.getElementById('skills').value.split(',').map(s => s.trim()).filter(s => s),
+                favorite_source_ids: favSources
+            };
+            const res = await fetch('/users/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                const data = await res.json();
+                const code = data.telegram_activation_code;
+                msg.innerHTML = `
+                    <div class="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl animate-fade-in-up">
+                        <p class="text-green-400 font-bold mb-2">✅ ثبت‌نام با موفقیت انجام شد!</p>
+                        <p class="text-gray-300 text-sm mb-2">کد فعال‌سازی تلگرام شما:</p>
+                        <div class="flex items-center justify-center gap-2 bg-black/40 p-3 rounded-lg border border-brand-500/30 mb-3">
+                            <code class="text-xl font-mono text-brand-300 select-all tracking-wider">${code}</code>
+                            <button onclick="navigator.clipboard.writeText('${code}'); this.textContent='کپی شد!'; setTimeout(()=>this.textContent='کپی', 2000)" class="text-xs bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded transition">کپی</button>
+                        </div>
+                        <button onclick="showAuthTab('login')" class="w-full btn-primary text-white py-2.5 rounded-lg font-bold text-sm">ورود به حساب کاربری</button>
+                    </div>
+                `;
+            } else {
+                const err = await res.json();
+                msg.className = 'text-sm text-center text-red-400 block';
+                msg.textContent = `❌ ${err.detail || 'خطا در ثبت‌نام'}`;
+            }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!token) return;
+            const msg = document.getElementById('profile_msg');
+            msg.className = 'text-sm text-center text-gray-400 block';
+            msg.textContent = 'در حال ذخیره...';
+            const favSources = Array.from(document.querySelectorAll('#profile_sourcesList input:checked')).map(cb => parseInt(cb.value));
+            const payload = {
+                name: document.getElementById('profile_name').value,
+                email: document.getElementById('profile_email').value,
+                experience_years: parseInt(document.getElementById('profile_experience').value),
+                target_market: document.getElementById('profile_market').value,
+                skills: document.getElementById('profile_skills').value.split(',').map(s => s.trim()).filter(s => s),
+                favorite_source_ids: favSources
+            };
+            const password = document.getElementById('profile_password').value;
+            if (password) payload.password = password;
+            const res = await fetch('/users/me', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                const user = await res.json();
+                updateUIAfterLogin(user.name);
+                msg.className = 'text-sm text-center text-green-400 block';
+                msg.textContent = '✅ پروفایل با موفقیت بروزرسانی شد';
+            } else {
+                const err = await res.json();
+                msg.className = 'text-sm text-center text-red-400 block';
+                msg.textContent = `❌ ${err.detail || 'خطا در بروزرسانی'}`;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#user-section')) {
+                document.getElementById('user-menu').classList.remove('active');
+            }
+        });
+
+        if (token) {
+            fetch('/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.ok ? res.json() : Promise.reject())
+                .then(user => updateUIAfterLogin(user.name))
+                .catch(() => logout());
+        }
+        handleRoute();
+    </script>
+</body>
+</html>
