@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
 from enum import Enum
 
@@ -32,14 +32,13 @@ class UserProfileUpdate(BaseModel):
 
 
 class UserProfileResponse(UserProfileBase):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     telegram_chat_id: Optional[str] = None
     telegram_activation_code: Optional[str] = None
     is_telegram_verified: bool = False
     favorite_sources: Optional[List['JobSourceResponse']] = []
-    
-    class Config:
-        from_attributes = True
 
 
 class JobSourceBase(BaseModel):
@@ -51,10 +50,9 @@ class JobSourceBase(BaseModel):
 
 
 class JobSourceResponse(JobSourceBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
     
-    class Config:
-        from_attributes = True
+    id: int
 
 
 class JobOpportunityBase(BaseModel):
@@ -72,11 +70,10 @@ class JobOpportunityCreate(JobOpportunityBase):
 
 
 class JobOpportunityResponse(JobOpportunityBase):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     status: str = "ACTIVE"
-    
-    class Config:
-        from_attributes = True
 
 
 class JobOpportunityUpdate(BaseModel):

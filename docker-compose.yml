@@ -1,0 +1,58 @@
+
+
+services:
+  # FastAPI Application
+  app:
+    build: .
+    container_name: careerflow_app
+    ports:
+      - "8000:8000"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - SMTP_HOST=${SMTP_HOST:-mailpit}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@careerflow.local}
+      - SECRET_KEY=${SECRET_KEY:-career-flow-secret-key-2026}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://careerflow:careerflow@db:5432/careerflow}
+    volumes:
+      - ./static:/app/static
+    depends_on:
+      - db
+      - mailpit
+    restart: unless-stopped
+    networks:
+      - careerflow_network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: careerflow_db
+    environment:
+      - POSTGRES_USER=careerflow
+      - POSTGRES_PASSWORD=careerflow
+      - POSTGRES_DB=careerflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - careerflow_network
+
+  # Mailpit (Email Testing)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: careerflow_mailpit
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    restart: unless-stopped
+    networks:
+      - careerflow_network
+
+networks:
+  careerflow_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

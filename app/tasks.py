@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import Message
+from app.core.logger import logger
 
 from app.database import SessionLocal
 from app import models
@@ -60,7 +61,7 @@ async def handle_activation_code(message: Message):
         )
     except Exception as e:
         await message.answer("❌ An error occurred. Please try again later.")
-        print(f"DB Error: {e}")
+        logger.error(f"DB Error: {e}")
     finally:
         db.close()
 
@@ -104,7 +105,7 @@ async def cmd_matches(message: Message):
 
     except Exception as e:
         await message.answer("❌ Error fetching job recommendations.")
-        print(f"Match Error: {e}")
+        logger.error(f"Match Error: {e}")
     finally:
         db.close()
 
@@ -128,7 +129,7 @@ async def fetch_remotive():
                 })
             return jobs
     except Exception as e:
-        print(f"❌ Error fetching Remotive: {e}")
+        logger.error(f"❌ Error fetching Remotive: {e}")
         return []
 
 def fetch_weworkremotely():
@@ -151,7 +152,7 @@ def fetch_weworkremotely():
                 continue
         return jobs
     except Exception as e:
-        print(f"❌ Error fetching WeWorkRemotely: {e}")
+        logger.error(f"❌ Error fetching WeWorkRemotely: {e}")
         return []
 
 def fetch_remoteok():
@@ -179,7 +180,7 @@ def fetch_remoteok():
                 continue
         return jobs
     except Exception as e:
-        print(f"❌ Error fetching RemoteOK: {e}")
+        logger.error(f"❌ Error fetching RemoteOK: {e}")
         return []
 
 def fetch_python_org():
@@ -202,7 +203,7 @@ def fetch_python_org():
                 continue
         return jobs
     except Exception as e:
-        print(f"❌ Error fetching Python.org: {e}")
+        logger.error(f"❌ Error fetching Python.org: {e}")
         return []
 
 def fetch_hackernews():
@@ -227,32 +228,31 @@ def fetch_hackernews():
                 continue
         return jobs
     except Exception as e:
-        print(f"❌ Error fetching HackerNews: {e}")
+        logger.error(f"❌ Error fetching HackerNews: {e}")
         return []
 
 # --- Automated Scraper Task ---
 async def run_automated_scraper():
-    print("\n" + "="*60)
-    print("⏰ [Scheduler] Starting automated job scraping...")
-    print("="*60)
-    
+    logger.info("⏰ [Scheduler] Starting automated job scraping...")
+    logger.info("="*60)
+
     db = SessionLocal()
     try:
         # Fetch from all sources concurrently
         remotive_jobs = await fetch_remotive()
-        print(f"✅ Remotive: {len(remotive_jobs)} jobs")
+        logger.info(f"✅ Remotive: {len(remotive_jobs)} jobs")
         
         wwr_jobs = fetch_weworkremotely()
-        print(f"✅ WeWorkRemotely: {len(wwr_jobs)} jobs")
+        logger.info(f"✅ WeWorkRemotely: {len(wwr_jobs)} jobs")
         
         remoteok_jobs = fetch_remoteok()
-        print(f"✅ RemoteOK: {len(remoteok_jobs)} jobs")
+        logger.info(f"✅ RemoteOK: {len(remoteok_jobs)} jobs")
         
         python_org_jobs = fetch_python_org()
-        print(f"✅ Python.org: {len(python_org_jobs)} jobs")
+        logger.info(f"✅ Python.org: {len(python_org_jobs)} jobs")
         
         hn_jobs = fetch_hackernews()
-        print(f"✅ HackerNews: {len(hn_jobs)} jobs")
+        logger.info(f"✅ HackerNews: {len(hn_jobs)} jobs")
         
         # Aggregate all jobs
         all_jobs = []
@@ -262,7 +262,7 @@ async def run_automated_scraper():
         all_jobs.extend(python_org_jobs)
         all_jobs.extend(hn_jobs)
         
-        print(f"\n📊 Total jobs fetched: {len(all_jobs)}")
+        logger.info(f"\n📊 Total jobs fetched: {len(all_jobs)}")
         
         # Save to database (prevent duplicates)
         count = 0
@@ -280,12 +280,12 @@ async def run_automated_scraper():
                 count += 1
         
         db.commit()
-        print(f"\n🎉 Success! {count} new jobs added to database.")
-        print(f"📊 Total jobs in database: {db.query(models.JobOpportunity).count()}")
-        print("="*60 + "\n")
+        logger.info(f"\n🎉 Success! {count} new jobs added to database.")
+        logger.info(f"📊 Total jobs in database: {db.query(models.JobOpportunity).count()}")
+        logger.info("="*60 + "\n")
         
     except Exception as e:
-        print(f"❌ [Scheduler] Error in scraping: {e}")
+        logger.error(f"❌ [Scheduler] Error in scraping: {e}")
         db.rollback()
     finally:
         db.close()
@@ -293,9 +293,8 @@ async def run_automated_scraper():
 # --- Auto-send Jobs to Users ---
 async def send_daily_jobs_to_users():
     """Send top jobs to all verified users"""
-    print("\n" + "="*60)
-    print("📬 [Scheduler] Starting automated job delivery to users...")
-    print("="*60)
+    logger.info("📬 [Scheduler] Starting automated job delivery to users...")
+
     
     db = SessionLocal()
     try:
@@ -305,7 +304,7 @@ async def send_daily_jobs_to_users():
             models.UserProfile.telegram_chat_id != None
         ).all()
         
-        print(f"👥 Verified users: {len(users)}")
+        logger.info(f"👥 Verified users: {len(users)}")
         
         sent_count = 0
         for user in users:
@@ -342,20 +341,20 @@ async def send_daily_jobs_to_users():
                     )
                 
                 sent_count += 1
-                print(f"✅ Jobs sent to {user.name}")
+                logger.info(f"✅ Jobs sent to {user.name}")
                 
                 # Prevent Telegram rate limit
                 await asyncio.sleep(1)
                 
             except Exception as e:
-                print(f"❌ Error sending to {user.name}: {e}")
+                logger.error(f"❌ Error sending to {user.name}: {e}")
                 continue
         
-        print(f"\n🎉 Auto-delivery completed! {sent_count} users received jobs.")
-        print("="*60 + "\n")
+        logger.info(f"\n🎉 Auto-delivery completed! {sent_count} users received jobs.")
+        logger.info("="*60 + "\n")
         
     except Exception as e:
-        print(f"❌ Error in auto-delivery: {e}")
+        logger.error(f"❌ Error in auto-delivery: {e}")
     finally:
         db.close()
 
@@ -363,19 +362,19 @@ async def send_daily_jobs_to_users():
 async def start_background_tasks():
     if BOT_TOKEN:
         asyncio.create_task(dp.start_polling(bot))
-        print("✅ Telegram bot started in background.")
+        logger.info("✅ Telegram bot started in background.")
     else:
-        print("⚠️ BOT_TOKEN not set in .env. Telegram bot will not run.")
+        logger.warning("⚠️ BOT_TOKEN not set in .env. Telegram bot will not run.")
 
     # Schedule scraper: every 30 minutes
     scheduler.add_job(run_automated_scraper, 'interval', minutes=30)
     
     # Schedule auto-delivery: every day at 9 AM
     scheduler.add_job(send_daily_jobs_to_users, 'cron', hour=9, minute=0)
-    print("✅ Scheduled auto job delivery (daily at 9 AM).")
+    logger.info("✅ Scheduled auto job delivery (daily at 9 AM).")
     
     scheduler.start()
-    print("✅ Scheduled scraper (every 30 minutes).")
+    logger.info("✅ Scheduled scraper (every 30 minutes).")
     
     # Run scraper immediately on startup
     await run_automated_scraper()

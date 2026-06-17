@@ -8,39 +8,44 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from contextlib import asynccontextmanager
-from app.tasks import start_background_tasks
+import os
 
 from app.database import engine, Base
 from app.models import JobSource, UserProfile, JobOpportunity, BlockedIP
 from app.routes import users, jobs, sources
+from app.tasks import start_background_tasks
+from app.middleware import BlockIPMiddleware
 
 
+# --- Lifespan (Startup & Shutdown) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup tasks
+    # Startup
     print("🚀 Starting background services...")
     await start_background_tasks()
     yield
-    # Shutdown tasks
+    # Shutdown
     print("🛑 Shutting down background services...")
 
+
+# --- FastAPI App ---
 app = FastAPI(
     title="CareerFlow API",
     description="Smart API for managing and recommending job opportunities",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan 
+    lifespan=lifespan
 )
 
 Base.metadata.create_all(bind=engine)
 
 
-# CORS
+# --- CORS Middleware ---
 origins = [
-    "http://localhost:3000", 
-    "http://localhost:5173", 
-    "http://127.0.0.1:3000", 
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:5173"
 ]
 app.add_middleware(
@@ -52,24 +57,22 @@ app.add_middleware(
 )
 
 
-# Rate Limiting
+# --- Rate Limiting ---
 limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# IP Blocking Middleware
-from app.middleware import BlockIPMiddleware
+# --- IP Blocking Middleware ---
 app.add_middleware(BlockIPMiddleware)
 
 
-# Serve static files (for frontend)
-import os
+# --- Static Files ---
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# Admin Panel Authentication
+# --- Admin Panel Authentication ---
 class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
@@ -91,6 +94,7 @@ class AdminAuth(AuthenticationBackend):
 authentication_backend = AdminAuth(secret_key="career-flow-secret-key-2026-change-in-production")
 
 
+# --- Admin Panel Views ---
 class JobSourceAdmin(ModelView, model=JobSource):
     name = "Job Source"
     name_plural = "Job Sources"
@@ -104,8 +108,21 @@ class UserProfileAdmin(ModelView, model=UserProfile):
     name = "User"
     name_plural = "Users"
     icon = "fa-solid fa-user"
-    column_list = [UserProfile.id, UserProfile.name, UserProfile.email, UserProfile.target_market, UserProfile.experience_years, UserProfile.is_telegram_verified]
-    form_columns = [UserProfile.name, UserProfile.target_market, UserProfile.experience_years, UserProfile.email, UserProfile.telegram_chat_id]
+    column_list = [
+        UserProfile.id, 
+        UserProfile.name, 
+        UserProfile.email, 
+        UserProfile.target_market, 
+        UserProfile.experience_years, 
+        UserProfile.is_telegram_verified
+    ]
+    form_columns = [
+        UserProfile.name, 
+        UserProfile.target_market, 
+        UserProfile.experience_years, 
+        UserProfile.email, 
+        UserProfile.telegram_chat_id
+    ]
     column_searchable_list = [UserProfile.name, UserProfile.email]
 
 
@@ -113,9 +130,23 @@ class JobOpportunityAdmin(ModelView, model=JobOpportunity):
     name = "Job Opportunity"
     name_plural = "Job Opportunities"
     icon = "fa-solid fa-briefcase"
-    column_list = [JobOpportunity.id, JobOpportunity.title, JobOpportunity.company, JobOpportunity.market_type, JobOpportunity.source, JobOpportunity.is_remote, JobOpportunity.status]
-    form_columns = [JobOpportunity.title, JobOpportunity.company, JobOpportunity.market_type, JobOpportunity.url, JobOpportunity.source, JobOpportunity.status]
+    column_list = [
+        JobOpportunity.id, 
+        JobOpportunity.title, 
+        JobOpportunity.company, 
+        JobOpportunity.source, 
+        JobOpportunity.is_remote, 
+        JobOpportunity.status
+    ]
+    form_columns = [
+        JobOpportunity.title, 
+        JobOpportunity.company, 
+        JobOpportunity.url, 
+        JobOpportunity.source, 
+        JobOpportunity.status
+    ]
     column_searchable_list = [JobOpportunity.title, JobOpportunity.company]
+    column_default_sort = ("id", True)
 
 
 class BlockedIPAdmin(ModelView, model=BlockedIP):
@@ -127,23 +158,68 @@ class BlockedIPAdmin(ModelView, model=BlockedIP):
     column_searchable_list = [BlockedIP.ip_address]
 
 
-admin = Admin(app, engine, title="CareerFlow Admin", authentication_backend=authentication_backend)
+# --- Initialize Admin Panel ---
+admin = Admin(
+    app, 
+    engine, 
+    title="CareerFlow Admin", 
+    authentication_backend=authentication_backend
+)
 admin.add_view(JobSourceAdmin)
 admin.add_view(UserProfileAdmin)
 admin.add_view(JobOpportunityAdmin)
 admin.add_view(BlockedIPAdmin)
 
 
+# --- Root Endpoint (Frontend) ---
 @app.get("/")
 def read_root():
     return FileResponse("static/index.html")
 
 
+# --- Health Check ---
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
 
+# --- Admin Stats API (JSON) ---
+@app.get("/api/stats")
+def admin_stats():
+    """Admin dashboard statistics - JSON API"""
+    from app.database import SessionLocal
+    from sqlalchemy import func
+    
+    db = SessionLocal()
+    try:
+        total_users = db.query(UserProfile).count()
+        verified_users = db.query(UserProfile).filter(UserProfile.is_telegram_verified == True).count()
+        total_jobs = db.query(JobOpportunity).count()
+        active_jobs = db.query(JobOpportunity).filter(JobOpportunity.status == "ACTIVE").count()
+        remote_jobs = db.query(JobOpportunity).filter(JobOpportunity.is_remote == True).count()
+        total_sources = db.query(JobSource).filter(JobSource.is_active == True).count()
+        
+        jobs_by_source_query = db.query(
+            JobOpportunity.source, 
+            func.count(JobOpportunity.id).label('count')
+        ).group_by(JobOpportunity.source).all()
+        
+        jobs_by_source = {source or 'Unknown': count for source, count in jobs_by_source_query}
+        
+        return {
+            "total_users": total_users,
+            "verified_users": verified_users,
+            "total_jobs": total_jobs,
+            "active_jobs": active_jobs,
+            "remote_jobs": remote_jobs,
+            "total_sources": total_sources,
+            "jobs_by_source": jobs_by_source
+        }
+    finally:
+        db.close()
+
+
+# --- Include Routers ---
 app.include_router(users.router)
 app.include_router(jobs.router)
 app.include_router(sources.router)

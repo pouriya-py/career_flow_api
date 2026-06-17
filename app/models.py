@@ -25,7 +25,7 @@ class UserProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False)
     skills = Column(JSON, nullable=True)
-    target_market = Column(SQLEnum(MarketType), default=MarketType.GLOBAL, nullable=False)
+    target_market = Column(SQLEnum(MarketType, native_enum=False), default=MarketType.GLOBAL, nullable=False)
     experience_years = Column(Integer, nullable=False)
     email = Column(String(100), nullable=True, unique=True)
     hashed_password = Column(String(200), nullable=True)  # 👈 این خط اضافه شد
@@ -45,7 +45,7 @@ class JobOpportunity(Base):
     title = Column(String(200), nullable=False)
     company = Column(String(100), nullable=False)
     required_skills = Column(JSON, nullable=False)
-    market_type = Column(SQLEnum(MarketType), default=MarketType.GLOBAL, nullable=False)
+    market_type = Column(SQLEnum(MarketType, native_enum=False), default=MarketType.GLOBAL, nullable=False)
     url = Column(String(500), nullable=True)
     source = Column(String(100), nullable=True)
     is_remote = Column(Boolean, default=False, nullable=False)

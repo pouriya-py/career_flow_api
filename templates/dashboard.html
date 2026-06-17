@@ -1,0 +1,79 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">System Overview</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Total Users</h6>
+                            <h2>{{ total_users }}</h2>
+                            <small>{{ verified_users }} verified</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Total Jobs</h6>
+                            <h2>{{ total_jobs }}</h2>
+                            <small>{{ active_jobs }} active</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Remote Jobs</h6>
+                            <h2>{{ remote_jobs }}</h2>
+                            <small>{{ (remote_jobs / total_jobs * 100) | int }}% of total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Active Sources</h6>
+                            <h2>{{ total_sources }}</h2>
+                            <small>Job sources</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Jobs by Source</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Source</th>
+                                        <th>Job Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for source, count in jobs_by_source %}
+                                    <tr>
+                                        <td>{{ source or 'Unknown' }}</td>
+                                        <td><span class="badge bg-primary">{{ count }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

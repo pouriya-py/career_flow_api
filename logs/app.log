@@ -1,0 +1,87 @@
+2026-06-17 14:11:55.255 | INFO     | app.main:lifespan:24 - 🚀 Starting background services...
+2026-06-17 14:11:55.257 | INFO     | app.tasks:start_background_tasks:365 - ✅ Telegram bot started in background.
+2026-06-17 14:11:55.264 | INFO     | app.tasks:start_background_tasks:374 - ✅ Scheduled auto job delivery (daily at 9 AM).
+2026-06-17 14:11:55.266 | INFO     | app.tasks:start_background_tasks:377 - ✅ Scheduled scraper (every 30 minutes).
+2026-06-17 14:11:55.266 | INFO     | app.tasks:run_automated_scraper:236 - ⏰ [Scheduler] Starting automated job scraping...
+2026-06-17 14:11:55.266 | INFO     | app.tasks:run_automated_scraper:237 - ============================================================
+2026-06-17 14:11:56.302 | INFO     | app.tasks:run_automated_scraper:243 - ✅ Remotive: 30 jobs
+2026-06-17 14:11:57.736 | INFO     | app.tasks:run_automated_scraper:246 - ✅ WeWorkRemotely: 20 jobs
+2026-06-17 14:11:59.600 | INFO     | app.tasks:run_automated_scraper:249 - ✅ RemoteOK: 1 jobs
+2026-06-17 14:12:00.354 | INFO     | app.tasks:run_automated_scraper:252 - ✅ Python.org: 15 jobs
+2026-06-17 14:12:01.490 | INFO     | app.tasks:run_automated_scraper:255 - ✅ HackerNews: 0 jobs
+2026-06-17 14:12:01.490 | INFO     | app.tasks:run_automated_scraper:265 - 
+📊 Total jobs fetched: 66
+2026-06-17 14:12:01.604 | INFO     | app.tasks:run_automated_scraper:283 - 
+🎉 Success! 4 new jobs added to database.
+2026-06-17 14:12:01.614 | INFO     | app.tasks:run_automated_scraper:284 - 📊 Total jobs in database: 76
+2026-06-17 14:12:01.615 | INFO     | app.tasks:run_automated_scraper:285 - ============================================================
+
+2026-06-17 14:23:28.662 | INFO     | app.main:lifespan:24 - 🚀 Starting background services...
+2026-06-17 14:23:28.663 | INFO     | app.tasks:start_background_tasks:365 - ✅ Telegram bot started in background.
+2026-06-17 14:23:28.669 | INFO     | app.tasks:start_background_tasks:374 - ✅ Scheduled auto job delivery (daily at 9 AM).
+2026-06-17 14:23:28.670 | INFO     | app.tasks:start_background_tasks:377 - ✅ Scheduled scraper (every 30 minutes).
+2026-06-17 14:23:28.670 | INFO     | app.tasks:run_automated_scraper:236 - ⏰ [Scheduler] Starting automated job scraping...
+2026-06-17 14:23:28.670 | INFO     | app.tasks:run_automated_scraper:237 - ============================================================
+2026-06-17 14:23:29.608 | INFO     | app.tasks:run_automated_scraper:243 - ✅ Remotive: 30 jobs
+2026-06-17 14:23:30.800 | INFO     | app.tasks:run_automated_scraper:246 - ✅ WeWorkRemotely: 20 jobs
+2026-06-17 14:23:32.461 | INFO     | app.tasks:run_automated_scraper:249 - ✅ RemoteOK: 1 jobs
+2026-06-17 14:23:33.231 | INFO     | app.tasks:run_automated_scraper:252 - ✅ Python.org: 15 jobs
+2026-06-17 14:23:38.731 | INFO     | app.tasks:run_automated_scraper:255 - ✅ HackerNews: 0 jobs
+2026-06-17 14:23:38.731 | INFO     | app.tasks:run_automated_scraper:265 - 
+📊 Total jobs fetched: 66
+2026-06-17 14:23:38.758 | INFO     | app.tasks:run_automated_scraper:283 - 
+🎉 Success! 0 new jobs added to database.
+2026-06-17 14:23:38.761 | INFO     | app.tasks:run_automated_scraper:284 - 📊 Total jobs in database: 76
+2026-06-17 14:23:38.762 | INFO     | app.tasks:run_automated_scraper:285 - ============================================================
+
+2026-06-17 14:39:21.481 | INFO     | app.tasks:start_background_tasks:365 - ✅ Telegram bot started in background.
+2026-06-17 14:39:21.485 | INFO     | app.tasks:start_background_tasks:374 - ✅ Scheduled auto job delivery (daily at 9 AM).
+2026-06-17 14:39:21.486 | INFO     | app.tasks:start_background_tasks:377 - ✅ Scheduled scraper (every 30 minutes).
+2026-06-17 14:39:21.486 | INFO     | app.tasks:run_automated_scraper:236 - ⏰ [Scheduler] Starting automated job scraping...
+2026-06-17 14:39:21.486 | INFO     | app.tasks:run_automated_scraper:237 - ============================================================
+2026-06-17 14:39:22.378 | INFO     | app.tasks:run_automated_scraper:243 - ✅ Remotive: 30 jobs
+2026-06-17 14:39:23.365 | INFO     | app.tasks:run_automated_scraper:246 - ✅ WeWorkRemotely: 20 jobs
+2026-06-17 14:39:25.080 | INFO     | app.tasks:run_automated_scraper:249 - ✅ RemoteOK: 1 jobs
+2026-06-17 14:39:25.801 | INFO     | app.tasks:run_automated_scraper:252 - ✅ Python.org: 15 jobs
+2026-06-17 14:39:26.855 | INFO     | app.tasks:run_automated_scraper:255 - ✅ HackerNews: 0 jobs
+2026-06-17 14:39:26.855 | INFO     | app.tasks:run_automated_scraper:265 - 
+📊 Total jobs fetched: 66
+2026-06-17 14:39:26.887 | INFO     | app.tasks:run_automated_scraper:283 - 
+🎉 Success! 0 new jobs added to database.
+2026-06-17 14:39:26.893 | INFO     | app.tasks:run_automated_scraper:284 - 📊 Total jobs in database: 76
+2026-06-17 14:39:26.893 | INFO     | app.tasks:run_automated_scraper:285 - ============================================================
+
+2026-06-17 14:43:21.909 | INFO     | app.tasks:start_background_tasks:365 - ✅ Telegram bot started in background.
+2026-06-17 14:43:21.911 | INFO     | app.tasks:start_background_tasks:374 - ✅ Scheduled auto job delivery (daily at 9 AM).
+2026-06-17 14:43:21.912 | INFO     | app.tasks:start_background_tasks:377 - ✅ Scheduled scraper (every 30 minutes).
+2026-06-17 14:43:21.912 | INFO     | app.tasks:run_automated_scraper:236 - ⏰ [Scheduler] Starting automated job scraping...
+2026-06-17 14:43:21.912 | INFO     | app.tasks:run_automated_scraper:237 - ============================================================
+2026-06-17 14:43:22.799 | INFO     | app.tasks:run_automated_scraper:243 - ✅ Remotive: 30 jobs
+2026-06-17 14:43:24.164 | INFO     | app.tasks:run_automated_scraper:246 - ✅ WeWorkRemotely: 20 jobs
+2026-06-17 14:43:25.847 | INFO     | app.tasks:run_automated_scraper:249 - ✅ RemoteOK: 1 jobs
+2026-06-17 14:43:26.503 | INFO     | app.tasks:run_automated_scraper:252 - ✅ Python.org: 15 jobs
+2026-06-17 14:43:28.940 | INFO     | app.tasks:run_automated_scraper:255 - ✅ HackerNews: 0 jobs
+2026-06-17 14:43:28.940 | INFO     | app.tasks:run_automated_scraper:265 - 
+📊 Total jobs fetched: 66
+2026-06-17 14:43:29.007 | INFO     | app.tasks:run_automated_scraper:283 - 
+🎉 Success! 66 new jobs added to database.
+2026-06-17 14:43:29.010 | INFO     | app.tasks:run_automated_scraper:284 - 📊 Total jobs in database: 66
+2026-06-17 14:43:29.010 | INFO     | app.tasks:run_automated_scraper:285 - ============================================================
+
+2026-06-17 15:00:21.497 | INFO     | app.tasks:start_background_tasks:365 - ✅ Telegram bot started in background.
+2026-06-17 15:00:21.501 | INFO     | app.tasks:start_background_tasks:374 - ✅ Scheduled auto job delivery (daily at 9 AM).
+2026-06-17 15:00:21.502 | INFO     | app.tasks:start_background_tasks:377 - ✅ Scheduled scraper (every 30 minutes).
+2026-06-17 15:00:21.502 | INFO     | app.tasks:run_automated_scraper:236 - ⏰ [Scheduler] Starting automated job scraping...
+2026-06-17 15:00:21.502 | INFO     | app.tasks:run_automated_scraper:237 - ============================================================
+2026-06-17 15:00:22.419 | INFO     | app.tasks:run_automated_scraper:243 - ✅ Remotive: 30 jobs
+2026-06-17 15:00:23.429 | INFO     | app.tasks:run_automated_scraper:246 - ✅ WeWorkRemotely: 20 jobs
+2026-06-17 15:00:25.373 | INFO     | app.tasks:run_automated_scraper:249 - ✅ RemoteOK: 1 jobs
+2026-06-17 15:00:26.031 | INFO     | app.tasks:run_automated_scraper:252 - ✅ Python.org: 15 jobs
+2026-06-17 15:00:29.840 | INFO     | app.tasks:run_automated_scraper:255 - ✅ HackerNews: 0 jobs
+2026-06-17 15:00:29.840 | INFO     | app.tasks:run_automated_scraper:265 - 
+📊 Total jobs fetched: 66
+2026-06-17 15:00:29.882 | INFO     | app.tasks:run_automated_scraper:283 - 
+🎉 Success! 0 new jobs added to database.
+2026-06-17 15:00:29.886 | INFO     | app.tasks:run_automated_scraper:284 - 📊 Total jobs in database: 66
+2026-06-17 15:00:29.886 | INFO     | app.tasks:run_automated_scraper:285 - ============================================================
+
