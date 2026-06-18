@@ -183,6 +183,9 @@ def head_root():
     """Health check for Render"""
     from fastapi.responses import Response
     return Response(status_code=200)
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
 
 
 # --- Admin Stats API (JSON) ---
